@@ -17,7 +17,7 @@ def isBackgroundPixel(pixel, bgPixel, threshold):
 	else:
 		return False
 	
-def imgThresholding(differences, img, rWeight = 1.0 / 3, gWeight = 1.0 / 3, bWeight = 1.0 / 3, fgThreshold = 40, bgThreshold = 20):
+def imgThresholding(differences, img, rWeight = 1.0 / 3, gWeight = 1.0 / 3, bWeight = 1.0 / 3, fgThreshold = 30, bgThreshold = 15):
 	newImg = np.copy(img)
 	for r in range(img.shape[0]):
 		for c in range(img.shape[1]):
@@ -31,6 +31,32 @@ def imgThresholding(differences, img, rWeight = 1.0 / 3, gWeight = 1.0 / 3, bWei
 				newImg[r][c] = [0, 0, 0] # replace background with black color
 
 	return newImg
+	
+# Get the pixel at row r and col c of img. If the pixel is out of range, the zero vector is returned. 
+def getPixel(img, r, c):
+	if r >= 0 and r <= img.shape[0] - 1 and c >= 0 and c <= img.shape[1] - 1:
+		return img[r][c]
+	else:
+		return [0, 0, 0]
+
+# Remove noise pixels from the image. Objects in the background are thinner and have less pixel density, 
+# and may be misconstrued as noise, so a weaker form of noise removal is used.
+# A pixel is a noise pixel if the pixels surrounding it are zero.
+def removeNoise(img):
+	for r in range(img.shape[0]):
+		for c in range(img.shape[1]):
+			upPixel = getPixel(img, r - 1, c)
+			downPixel = getPixel(img, r + 1, c)
+			leftPixel = getPixel(img, r, c - 1)
+			rightPixel = getPixel(img, r, c + 1)
+			
+			if r <= 1.0 / 5 * img.shape[0]: # background pixel
+				if np.all(upPixel + downPixel + leftPixel + rightPixel == [0, 0, 0]):
+					img[r][c] = [0, 0, 0]
+			else: # foreground pixel
+				if np.all(upPixel + downPixel == [0, 0, 0]) or np.all(leftPixel + rightPixel == [0, 0, 0]):
+					img[r][c] = [0, 0, 0]
+
 				
 cap = cv2.VideoCapture("traffic.mp4")
 cap.open("traffic.mp4")
@@ -84,6 +110,7 @@ for fr in range(1, frameCount):
 	currImg = np.float32(currImg) 
 	differences = np.fabs(currImg - prevImg) # treat previous frame as background
 	img = imgThresholding(differences, currImg)
+	removeNoise(img)
 	cv2.imwrite("img_" + str(fr) + ".jpg", img)
 	prevImg = alpha * currImg + (1.0 - alpha) * prevImg
 

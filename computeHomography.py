@@ -39,9 +39,9 @@ def computeHomography(pts):
     h[8] = 1
 
     homography = h.reshape(3,3)
-    print homography
+    # print homography
     
     return homography
 
-im_out = cv2.warpPerspective(img, h, (780, 540))
-cv2.imwrite("ss1_homog_computed.jpg", im_out)
+# im_out = cv2.warpPerspective(img, h, (780, 540))
+# cv2.imwrite("ss1_homog_computed.jpg", im_out)

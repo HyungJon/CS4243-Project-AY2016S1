@@ -2,13 +2,18 @@ import numpy as np
 import cv2
 import glob
 
-srcFolder = "beachVolleyball1_leftNetpole"
+srcFolder = "panoramaResult_final"
+
+images = []
+print "Reading frames, please wait..."
+for frame in glob.glob(srcFolder+"/*.jpg"):
+    images.append(cv2.imread(frame))
 
 cv2.namedWindow('Result')
+cv2.moveWindow('Result', 0,0)
 stop = False
 while not stop:
-    for frame in glob.glob(srcFolder+"/*.jpg"):
-        img = cv2.imread(frame)
+    for img in images:
         cv2.imshow('Result', img)
         k = cv2.waitKey(25)
         if k == 27:

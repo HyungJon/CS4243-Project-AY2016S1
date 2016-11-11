@@ -64,20 +64,41 @@ def trackBall(fcount, players, ballMvmt):
 
     return ballPos
 
-def drawTopDown(fcount, playerCount, players, ballMvmt):
+def trackJumps(players, jumpRecords, fcount):
+    jumps = np.zeros([fcount, playerCount])
+    for i in range(len(jumpRecords)):
+        times = jumpRecords[i].split()
+        for j in range(len(times)/2):
+            start = int(times[2*j])
+            end = int(times[2*j+1])
+            initial = players[i][start]
+            final = players[i][end]
+            f = end - start
+            x_int = (final[0] - initial[0])/f
+            y_int = (final[1] - initial[1])/f
+            for k in range(start, end):
+                players[i][k] = [initial[0] + x_int * (k-start), initial[1] + y_int * (k-start)]
+            for k in range(start, fcount):
+                jumps[k][i] = jumps[k][i] + 1
+    return (players, jumps)                
+            
+
+def drawTopDown(fcount, playerCount, players, ballMvmt, jumpRecords):
     player_dist = np.zeros(playerCount)
     ballPos = trackBall(fcount, players, ballMvmt)
+    players, jumps = trackJumps(players, jumpRecords, fcount)
 
     for fr in range(fcount):
         topdown = drawCourt(np.zeros([540,780,3]))
-        # print "Frame " + str(fr+1)
+        print "Frame " + str(fr+1)
 
         if fr > 0:
             for i in range(playerCount):
                 player_dist[i] = trackPlayerDist(players[i][fr], players[i][fr-1], player_dist[i])
             
         for i in range(playerCount):
-            # print "Distance moved by player " + str(i+1) + ": " + str(player_dist[i]) + "m"
+            print "Distance moved by player " + str(i+1) + ": " + str(player_dist[i]) + "m"
+            print "No. of jumps by player " + str(i+1) + ": " + str(jumps[fr][i])
             cv2.circle(topdown, (int(players[i][fr][0]), int(players[i][fr][1])), int(15), (255,0,0), int(-1))
         cv2.circle(topdown, (int(ballPos[fr][0]), int(ballPos[fr][1])), int(10), (0,255,0), int(-1)),
         cv2.imshow('Top-down view frame', cv2.convertScaleAbs(topdown))
@@ -93,6 +114,7 @@ player4 = [line.rstrip('\n').split() for line in open('video1_player4_topdown_sm
 playersPts = [player1, player2, player3, player4]
 
 ballMvmt = [line.rstrip('\n') for line in open('video1_ball.txt', 'r')]
+jumpRecords = [line.rstrip('\n') for line in open('video1_jump.txt', 'r')]
 
 fcount = len(player1)
 playerCount = len(playersPts)
@@ -104,5 +126,4 @@ for i in range(len(players)):
         players[i][j][0] = int(playersPts[i][j][0])
         players[i][j][1] = int(playersPts[i][j][1])
 
-drawTopDown(fcount, playerCount, players, ballMvmt)
-
+drawTopDown(fcount, playerCount, players, ballMvmt, jumpRecords)

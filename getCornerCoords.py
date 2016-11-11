@@ -5,6 +5,8 @@ lines0 = [line.rstrip('\n') for line in open('video1_leftCourtCorner.txt', 'r')]
 lines4 = [line.rstrip('\n') for line in open('video1_rightNetpole.txt', 'r')]
 lines5 = [line.rstrip('\n') for line in open('video1_leftNetpole.txt', 'r')]
 
+print len(lines1)
+
 coords = np.zeros([len(lines1)*2 - 1, 6, 2])
 
 for i in range(len(lines1)):

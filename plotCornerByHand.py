@@ -26,14 +26,14 @@ class plotCornerByHand:
 
         display = image.copy()
         if self.corner is not None:
-            cv2.circle(display, self.corner, 5, (0,0,255), -1)
+            cv2.circle(display, self.corner, 2, (0,0,255), -1)
         cv2.namedWindow("Plot Corner")
         cv2.setMouseCallback("Plot Corner", click)
         cv2.moveWindow("Plot Corner", 0, 0)
         while True:
             if self.refreshDisplay == True:
                 display = image.copy()
-                cv2.circle(display, self.corner, 5, (0,0,255), -1)
+                cv2.circle(display, self.corner, 2, (0,0,255), -1)
                 self.refreshDisplay = False
             cv2.imshow("Plot Corner", display)
             k = cv2.waitKey(10)

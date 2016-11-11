@@ -78,20 +78,20 @@ def drawCourt(orig):
         orig[y][149] = [0, 0, 255]
         orig[y][150] = [0, 0, 255]
         orig[y][151] = [0, 0, 255]
+        orig[y][627] = [0, 0, 255]
+        orig[y][628] = [0, 0, 255]
         orig[y][629] = [0, 0, 255]
-        orig[y][630] = [0, 0, 255]
-        orig[y][631] = [0, 0, 255]
     for x in range(149, 630):
         orig[149][x] = [0, 0, 255]
         orig[150][x] = [0, 0, 255]
         orig[151][x] = [0, 0, 255]
+        orig[387][x] = [0, 0, 255]
+        orig[388][x] = [0, 0, 255]
         orig[389][x] = [0, 0, 255]
-        orig[390][x] = [0, 0, 255]
-        orig[391][x] = [0, 0, 255]
     for y in range(119,419):
+        orig[y][388] = [0, 0, 255]
         orig[y][389] = [0, 0, 255]
         orig[y][390] = [0, 0, 255]
-        orig[y][391] = [0, 0, 255]
     return orig
 
 def trackPlayerStats(fr, coords_new, coords_last, player_dist):

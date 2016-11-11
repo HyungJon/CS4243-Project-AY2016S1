@@ -2,11 +2,10 @@ import numpy as np
 import cv2
 import cv2.cv as cv
 import math
-import random # just for simulating player movements: later remove
 import numpy.linalg as la
 
+videos = ["beachVolleyball1.mov"]
 target_coords = np.array([[630.0, 390.0], [630.0, 150.0], [150.0, 150.0], [150.0, 390.0], [390.0, 120.0], [390.0, 420.0]])
-player_coords = np.zeros([4, 2])
 player_dist = np.zeros([4])
 
 def getHomogBuiltIn(pts):
@@ -103,35 +102,26 @@ def createOutputFrame(orig):
         orig[389][x] = [0, 0, 255]
         orig[390][x] = [0, 0, 255]
         orig[391][x] = [0, 0, 255]
+    for y in range(119,419):
+        orig[y][389] = [0, 0, 255]
+        orig[y][390] = [0, 0, 255]
+        orig[y][391] = [0, 0, 255]
     return orig
 
-def trackPlayerStats(fr, coords, player_coords, player_dist):
+def trackPlayerStats(fr, coords_new, coords_last, player_dist):
     if fr == 0:
-        player_coords = coords
+        coords_new = coords_last
 
-    for i in range(len(coords)):
-        dist = abs(math.hypot((coords[i][0] - player_coords[i][0]), (coords[i][1] - player_coords[i][1])))
+    for i in range(len(coords_new)):
+        dist = abs(math.hypot((coords_new[i][0] - coords_last[i][0]), (coords_new[i][1] - coords_last[i][1])))
         player_dist[i] = player_dist[i] + dist * 0.0333
         # 1m = 30px => each pixel represents 3.33cm
-    player_coords = coords
-    return (player_coords, player_dist)
+    coords_new = coords_last
+    return player_dist
 
-def createRandomMovement(coords):
-    ydist = random.randint(0, 10) - 5
-    xdist = random.randint(0, 10) - 5
-    x = coords[0]
-    y = coords[1]
-    if x < 15:
-        xdist = xdist + 5
-    if x > 525:
-        xdist = xdist - 5
-    if y < 15:
-        ydist = ydist + 5
-    if y > 765:
-        ydist = ydist - 5
-    print xdist
-    print ydist
-    return [x + xdist, y + ydist]
+# def trackBallPos(player1, player2, player4, len):
+#     ballPos = np.zeros([len, 2])
+#     for i in range
 
 lines0 = [line.rstrip('\n') for line in open('video1_point0.txt', 'r')]
 lines1 = [line.rstrip('\n') for line in open('video1_point1.txt', 'r')]
@@ -139,39 +129,50 @@ lines3 = [line.rstrip('\n') for line in open('video1_point3.txt', 'r')]
 lines4 = [line.rstrip('\n') for line in open('video1_point4.txt', 'r')]
 lines5 = [line.rstrip('\n') for line in open('video1_point5.txt', 'r')]
 
+player1 = [line.rstrip('\n') for line in open('video1_player1.txt', 'r')]
+player2 = [line.rstrip('\n') for line in open('video1_player2.txt', 'r')]
+player3 = [line.rstrip('\n') for line in open('video1_player3.txt', 'r')]
+player4 = [line.rstrip('\n') for line in open('video1_player4.txt', 'r')]
+
 coords = np.zeros([len(lines1)*2 - 1, 6, 2])
+player_coords = np.zeros([len(player1)*2 - 1, 4, 2])
 
 for i in range(len(lines1)):
     coords[2*i] = [lines0[i].split(), lines1[i].split(), [-1,-1], lines3[i].split(), lines4[i].split(), lines5[i].split()]
     if i < len(lines1) - 1:
         coords[2*i+1] = coords[2*i]
 
+for i in range(len(player1)):
+    player_coords[2*i] = [player1[i].split(), player2[i].split(), player3[i].split(), player4[i].split()]
+    if i < len(player1) - 1:
+        player_coords[2*i+1] = player_coords[2*i]
+
 cap = cv2.VideoCapture("beachVolleyball1.mov")
 fcount = int(cap.get(cv.CV_CAP_PROP_FRAME_COUNT))
-
-for i in range(len(player_coords)):
-    player_coords[i][0] = random.randint(0, 780)
-    player_coords[i][1] = random.randint(0, 540)
-print player_coords
 
 for fr in range(len(coords)):
     _, frame = cap.read()
     h = getHomography(coords[fr])
     topdown = cv2.warpPerspective(frame, h, (780, 540))
+    # topdown = np.zeros([540,780,3])
     topdown = createOutputFrame(topdown)
 
-    # 
-    # add the fn to calculate player stats here
+    for i in range(len(player_dist)):
+        orig = [player_coords[fr][i][0], player_coords[fr][i][1], 1]
+        res = np.dot(h, orig)
+        player_coords[fr][i] = [res[0]/res[2], res[1]/res[2]]
 
-    newCoords = np.zeros([4, 2])
-    for i in range(len(player_coords)):
-        print i
-        newCoords[i] = createRandomMovement(player_coords[i])
-    player_coords, player_dist = trackPlayerStats(fr, newCoords, player_coords, player_dist)
-    print player_dist
+    if fr == 0:
+        player_dist = [0,0,0,0]
+    else:
+        player_dist = trackPlayerStats(fr, player_coords[fr], player_coords[fr-1], player_dist)
 
-    for i in range(len(player_coords)):
-        cv2.circle(topdown, (int(player_coords[i][0]), int(player_coords[i][1])), int(15), (255,0,0), int(-1))
+    for i in range(len(player_dist)):
+        msg = "Distance moved by player " + str(i+1) + ": " + str(player_dist[i]) + "m"
+        print msg
+        cv2.circle(topdown, (int(player_coords[fr][i][0]), int(player_coords[fr][i][1])), int(15), (255,0,0), int(-1))
+        filename = "td_fr"+str(fr+1)+".jpg"
+        cv2.imwrite(filename, topdown)
 
     cv2.imshow('Top-down view frame', cv2.convertScaleAbs(topdown))
     cv2.waitKey(10)

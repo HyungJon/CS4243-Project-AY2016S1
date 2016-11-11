@@ -23,3 +23,7 @@ def smoothFile(filePath, outPath, coordsCount):
         target2.write(str(y[i]))
         target2.write("\n")
     
+smoothFile("video1_player1_topdown.txt", "video1_player1_topdown_smooth.txt", 747)    
+smoothFile("video1_player2_topdown.txt", "video1_player2_topdown_smooth.txt", 747)    
+smoothFile("video1_player3_topdown.txt", "video1_player3_topdown_smooth.txt", 747)    
+smoothFile("video1_player4_topdown.txt", "video1_player4_topdown_smooth.txt", 747)

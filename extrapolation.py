@@ -5,23 +5,16 @@ import PIL.ImageOps as ImageOps
 import PIL.Image as Image
 import copy
 
-os.chdir("/Users/felix/pydir")
-print(os.getcwd())
-
-
 def generateBorder(filePath):
     img = Image.open(filePath)
     border = int(img.size[0] / 3)
-    borderLeft = border
     w, h = img.size
     img = img.crop((5, 5, w-5, h-5))
     img_with_border = ImageOps.expand(img, border, fill=0)
-    borderRight = img_with_border.size[0] - border
     img_with_border.save('tempWithBorder.jpg')
     img2 = cv2.imread('tempWithBorder.jpg')
     gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-    print(borderLeft, borderRight)
-    return gray, img2, borderLeft, borderRight
+    return gray, img2, border
 
 
 def generateBlackPicture(img):
@@ -64,7 +57,6 @@ def processLines(lines):
 def extrapolateEdges(gray, blackImg):
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
     lines = cv2.HoughLines(edges, 1, np.pi / 180, 150)
-    print(lines)
     newlines = processLines(lines)
     for i in range(len(newlines)):
         for rho, theta in lines[i]:
@@ -133,13 +125,21 @@ def markCorners(corners, img):
         cv2.circle(img, (int(x), int(y)), 3, 255, -1)
 
 
-def extrapolate(filePath):
-    gray, img, borderLeft, borderRight = generateBorder(filePath)
+def translateCorners(corners, border):
+    newCorners = []
+    for i in range(len(corners)):
+        x, y = corners[i]
+        newCorners.append([x-border, y-border])
+    return newCorners
+
+
+def extrapolate(inPath, outPath):
+    gray, img, border = generateBorder(inPath)
     blackImg = generateBlackPicture(img)
     gray = extrapolateEdges(img, blackImg)
     corners = extractCorners(gray)
     markCorners(corners, gray)
-    cv2.imwrite('houghlines3.jpg', gray)
-    return corners
+    cv2.imwrite(outPath, gray)
+    return translateCorners(corners, border)
 
-extrapolate("test11.jpg")
+print(extrapolate("test11.jpg", "out11.jpg"))

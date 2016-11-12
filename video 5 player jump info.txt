@@ -1,0 +1,15 @@
+Vid 5 closest to camera jump times
+181 - 220
+880 - 928
+
+Vid 5 second red guy
+421 - 475
+697 - 751
+805 - 847
+
+Vid 5 left white guy
+883 - 928
+
+Vid 5 right white guy
+406 - 463
+682 - 724

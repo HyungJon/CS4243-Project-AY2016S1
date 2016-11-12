@@ -3,6 +3,7 @@ import cv2
 import cv2.cv as cv
 import math
 import numpy.linalg as la
+import os
 
 def drawCourt(orig):
     for y in range(149, 390):
@@ -87,7 +88,13 @@ def drawTopDown(fcount, playerCount, players, ballMvmt, jumpRecords):
     ballPos = trackBall(fcount, players, ballMvmt)
     players, jumps = trackJumps(players, jumpRecords, fcount, playerCount)
 
-    folder = "topdown\\"
+    topdownfolder = "topdown"
+    if not os.path.exists(topdownfolder):
+            os.makedirs(topdownfolder)
+    statfolder = "stats"
+    if not os.path.exists(statfolder):
+            os.makedirs(statfolder)
+            
     for fr in range(fcount):
         topdown = drawCourt(np.zeros([540,780,3]))
         # print "Frame " + str(fr+1)
@@ -98,24 +105,25 @@ def drawTopDown(fcount, playerCount, players, ballMvmt, jumpRecords):
 
         statScreen = np.zeros([350,860,3], dtype=np.uint8)
         for i in range(playerCount):
-            stat = "Distance moved by player " + str(i+1) + ": " + str(player_dist[i]) + "m"
-            print jumps[fr]
-            cv2.putText(statScreen, stat, (60,(i+1)*70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color=(255,255,255))
+            distStat = "Distance moved by player " + str(i+1) + ": " + str(player_dist[i]) + "m"
+            jumpStat = "Number of times player " + str(i+1) + " jumped: " + str(int(jumps[fr][i]))
+            cv2.putText(statScreen, distStat, (60,(i*2+1)*36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color=(255,255,255))
+            cv2.putText(statScreen, jumpStat, (60,(i*2+2)*36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color=(255,255,255))
             cv2.circle(topdown, (int(players[i][fr][0]), int(players[i][fr][1])), int(15), (255,0,0), int(-1))
         if fr < 10: filename = "00"+str(fr)
         elif fr < 100: filename = "0"+str(fr)
         else: filename = str(fr)
-        #cv2.imwrite("stats\\"+filename+".jpg", statScreen)
-        #cv2.imshow("Stats", statScreen)
-        #cv2.waitKey(10)
+        cv2.imwrite(statfolder+"\\"+filename+".jpg", statScreen)
+        cv2.imshow("Stats", statScreen)
+        cv2.waitKey(10)
         cv2.circle(topdown, (int(ballPos[fr][0]), int(ballPos[fr][1])), int(10), (0,255,0), int(-1)),
 
         if fr < 10: filename = "00"+str(fr)
         elif fr < 100: filename = "0"+str(fr)
         else: filename = str(fr)
-        #cv2.imwrite(folder+filename+".jpg", cv2.convertScaleAbs(topdown))
-        # cv2.imshow('Top-down view frame', cv2.convertScaleAbs(topdown))
-        # cv2.waitKey(5)
+        cv2.imwrite(topdownfolder+"\\"+filename+".jpg", cv2.convertScaleAbs(topdown))
+        cv2.imshow('Top-down view frame', cv2.convertScaleAbs(topdown))
+        cv2.waitKey(10)
     #cv2.waitKey(1000)
     cv2.destroyAllWindows()
 

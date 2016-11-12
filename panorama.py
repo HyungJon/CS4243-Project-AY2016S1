@@ -67,7 +67,9 @@ for i in range(len(lines1)):
 cap = cv2.VideoCapture("beachVolleyball1.mov")
 fcount = int(cap.get(cv.CV_CAP_PROP_FRAME_COUNT))
 
-dstFolder = "panoramaResult"
+dstFolder = "panorama"
+if not os.path.exists(dstFolder):
+    os.makedirs(dstFolder)
 
 #This is the image that will store the panorama
 #We first run it one time to get the panorama, then we run it again so that we can see the player's actions in the panorama

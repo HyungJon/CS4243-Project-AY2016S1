@@ -1,17 +1,20 @@
 import numpy as np
 import cv2
 import glob
+import os
 
 originalFrames = []
 panoramaFrames = []
 topdownFrames = []
 statFrames = []
-start = 300
-end = 600
+
+# Set from which frame to which frame to process (if too many frames, numpy may throw memory error)
+start = 0
+end = 300   
 
 print "Reading frames, please wait...",
 count = 0
-for frame in glob.glob("video1/*.jpg"):
+for frame in glob.glob("frames/*.jpg"):
     count += 1
     if count >= start:
         originalFrames.append(cv2.imread(frame))
@@ -19,7 +22,7 @@ for frame in glob.glob("video1/*.jpg"):
     
 print "...",
 count = 0
-for frame in glob.glob("video1_panorama/*.jpg"):
+for frame in glob.glob("panorama/*.jpg"):
     count += 1
     if count >= start:
         panoramaFrames.append(cv2.imread(frame))
@@ -27,7 +30,7 @@ for frame in glob.glob("video1_panorama/*.jpg"):
     
 print "...",
 count = 0
-for frame in glob.glob("video1_topdown/*.jpg"):
+for frame in glob.glob("topdown/*.jpg"):
     count += 1
     if count >= start:
         topdownFrames.append(cv2.imread(frame))
@@ -35,12 +38,16 @@ for frame in glob.glob("video1_topdown/*.jpg"):
 
 print "..."
 count = 0
-for frame in glob.glob("video1_stats/*.jpg"):
+for frame in glob.glob("stats/*.jpg"):
     count += 1
     if count >= start:
         statFrames.append(cv2.imread(frame))
     if count == end: break
 
+dstfolder = "output"
+if not os.path.exists(dstfolder):
+    os.makedirs(dstfolder)
+            
 cv2.namedWindow("Result")
 cv2.moveWindow("Result", 0, 0)
 for i in range(end-start):
@@ -54,7 +61,7 @@ for i in range(end-start):
     if i+start < 10: n = "00"+str(i+start)
     elif i+start < 100: n = "0"+str(i+start)
     else: n = str(i+start)
-    cv2.imwrite("video1_output\\"+n+".jpg", result)
+    cv2.imwrite("output\\"+n+".jpg", result)
     cv2.imshow("Result", result)
     k = cv2.waitKey(15)
     '''if k == 27:

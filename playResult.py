@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import glob
 
-srcFolder = "panoramaResult_final"
+srcFolder = "topdown"
 
 images = []
 print "Reading frames, please wait..."
@@ -15,7 +15,7 @@ stop = False
 while not stop:
     for img in images:
         cv2.imshow('Result', img)
-        k = cv2.waitKey(25)
+        k = cv2.waitKey(16)
         if k == 27:
             stop = True
             break
